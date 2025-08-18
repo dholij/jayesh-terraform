@@ -1,38 +1,26 @@
-name: Terraform Deploy
-
-on:
-  workflow_dispatch:   # manual trigger
-  push:
-    branches:
-      - main
-
 jobs:
   terraform:
     runs-on: ubuntu-latest
-
-    env:
-      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-
-      # 👇 inject secret into Terraform variable
-      TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
-
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.9.5
 
-      - name: Terraform Init
-        run: terraform init
+      - name: Terraform Init & Apply
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
-      - name: Terraform Plan
-        run: terraform plan -out=tfplan
+          # 👇 inject the map as JSON (safely)
+          TF_VAR_secrets: >
+            {
+              "TestSecretforPOC-3": "Server=TestDB;Database=mydb;User Id=${{ secrets.DB_USER }};Password=${{ secrets.DB_PASSWORD }}"
+            }
 
-      - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
+        run: |
+          terraform init
+          terraform apply -auto-approve
