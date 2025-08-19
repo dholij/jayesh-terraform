@@ -18,7 +18,13 @@ jobs:
         run: terraform init
 
       - name: Terraform Plan
-        run: terraform plan -var="db_user=${{ secrets.DB_USER }}" -var="db_password=${{ secrets.DB_PASSWORD }}"
+        run: terraform plan
+        env:
+          TF_VAR_db_user: ${{ secrets.DB_USER }}
+          TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve -var="db_user=${{ secrets.DB_USER }}" -var="db_password=${{ secrets.DB_PASSWORD }}"
+        run: terraform apply -auto-approve
+        env:
+          TF_VAR_db_user: ${{ secrets.DB_USER }}
+          TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
