@@ -1,29 +1,18 @@
-name: Terraform Apply
-
-on:
-  workflow_dispatch:
-
 jobs:
-  terraform:
+  deploy:
     runs-on: ubuntu-latest
-    env:                       # ✅ set env vars at job level
-      TF_VAR_db_user: ${{ secrets.DB_USER }}
-      TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
-
+    env:
+      TF_VAR_db_user: ${{ secrets.db_user }}
+      TF_VAR_db_password: ${{ secrets.db_password }}
+      TF_VAR_subscription_id: ${{ secrets.subscription_id }}
+      TF_VAR_resource_group: ${{ secrets.resource_group }}
+      TF_VAR_key_vault_name: ${{ secrets.key_vault_name }}
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.9.5
+      # Add Azure CLI login step here
 
       - name: Terraform Init
         run: terraform init
 
-      - name: Terraform Plan
-        run: terraform plan    # ✅ no need to pass -var
-
       - name: Terraform Apply
         run: terraform apply -auto-approve
-
